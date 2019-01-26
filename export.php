@@ -21,8 +21,11 @@ $products  = $client->call($sessionId, "catalog_product.list");
 // print_r($products);
 
 
+// $requestedFormat= $_GET['format'];
 // You will need to create a FormatFactory.
-$formatKey = 'xml'; // csv, xml, or json
+$formatKey = 'xml'; // Change it to csv, xml, or json
+
+
 $factory = new FormatFactory(); 
 $factory->setProducts($products);
 $format = $factory->create($formatKey);

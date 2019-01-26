@@ -55,13 +55,23 @@ class FormatFactory extends ProductOutput
         }
 
         if ($formatKey == 'xml') {
+            
             $xmlArray= array(
                 "products"=>array(
                     "product"=>$cleanProducts
             ));
+            header('Content-Type: text/xml');
             $xmlObject = new myXML('1.0', 'utf-8');
+            $xmlObject->preserveWhiteSpace = false;
+            $xmlObject->formatOutput = true;
+
             $xmlObject->fromMixed($xmlArray);
-            print_r($xmlObject->saveXML());
+            $xmlObject = $xmlObject ->saveXML();
+            echo $xmlObject;
+
+            $fp = fopen('outputs/output.xml', 'w');
+            fwrite($fp, $xmlObject);
+            fclose($fp);
 
         }
 
@@ -72,6 +82,7 @@ class FormatFactory extends ProductOutput
                 $product = $this->products[$i];
                 $cleanProducts[]=$this->format->formatProduct($product);
             }
+            header('Content-Type: application/json');
             $productJSON =  arrayToJSON($cleanProducts);
             $fp = fopen('outputs/output.json', 'w');
             fwrite($fp, $productJSON);

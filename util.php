@@ -71,7 +71,7 @@ class myXML extends DOMDocument {
 					if ( $index == 0 ) {
 						$product = $domElement;
 					} else {
-						$node = $this->createElement($domElement->tagName);
+						$product = $this->createElement($domElement->tagName);
 						$domElement->parentNode->appendChild($product);
 					}
 				} 
