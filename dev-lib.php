@@ -65,7 +65,11 @@ class FormatFactory extends ProductOutput
                 $product = $this->products[$i];
                 $cleanProducts[]=$this->format->formatProduct($product);
             }
-            echo arrayToJSON($cleanProducts);
+            $productJSON =  arrayToJSON($cleanProducts);
+            $fp = fopen('outputs/output.json', 'w');
+            fwrite($fp, $productJSON);
+            fclose($fp);
+            echo $productJSON;
         }
         return $this->format;
     }   
