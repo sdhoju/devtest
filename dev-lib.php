@@ -34,6 +34,12 @@ class FormatFactory extends ProductOutput
 
         $this->formatkey=$formatKey;
         $maxProduct=5;
+        
+        $cleanProducts=[];
+        for($i=0; $i<$maxProduct; $i++) {
+            $product = $this->products[$i];
+            $cleanProducts[]=$this->format->formatProduct($product);
+        }
 
         if ($this->formatkey == 'csv') {
 
@@ -41,20 +47,21 @@ class FormatFactory extends ProductOutput
             $header = array("sku", "name", "price", "short_description");
             $fp = fopen('outputs/output.csv', 'w');
             fputcsv($fp, $header);
-
-            // foreach($this->products as $product){
-            for($i=0; $i<$maxProduct; $i++) {
-                $product = $this->products[$i];
-                $cleanProduct=$this->format->formatProduct($product);
+            foreach($cleanProducts as $cleanProduct){
                 fputcsv($fp, array_values($cleanProduct));
             }
             fclose($fp);
         
         }
 
-        if ($this->formatKey == 'xml') {
-            echo "From dev-lib.php. TODO for xml";
-            
+        if ($formatKey == 'xml') {
+            $xmlArray= array(
+                "products"=>array(
+                    "product"=>$cleanProducts
+            ));
+            $xmlObject = new myXML('1.0', 'utf-8');
+            $xmlObject->fromMixed($xmlArray);
+            print_r($xmlObject->saveXML());
 
         }
 

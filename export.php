@@ -22,7 +22,7 @@ $products  = $client->call($sessionId, "catalog_product.list");
 
 
 // You will need to create a FormatFactory.
-$formatKey = 'json'; // csv, xml, or json
+$formatKey = 'xml'; // csv, xml, or json
 $factory = new FormatFactory(); 
 $factory->setProducts($products);
 $format = $factory->create($formatKey);
