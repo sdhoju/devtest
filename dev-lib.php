@@ -7,14 +7,17 @@ require_once __DIR__ . '/raz-lib.php';
 
 class FormatFactory
 {
-    protected $formatKey;
+    private $formatKey;
 
     public function create($formatKey){
         $this->formatkey=$formatKey;
-        //TODO 
-        if ($this->formatKey == 'csv') {
-            echo "From dev-lib.php. TODO for csv";
 
+        if ($this->formatkey == 'csv') {
+
+            $header = array("sku", "name", "price", "short_description");
+            $fp = fopen('outputs/output.csv', 'w');
+            fputcsv($fp, $header);
+            fclose($fp);
         }
 
         if ($this->formatKey == 'xml') {

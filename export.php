@@ -23,24 +23,37 @@ $session = $soap->login($apiUser, $apiKey);
 $catalogProductEntity  = $soap->call($session, "catalog_product.list");
 
 $numberOfProducts=20; 
+$numberOfProducts=count($catalogProductEntity); 
+ 
+/**
+ *
+ * Clean the  an object to an array
+ *https://devdocs.magento.com/guides/m1x/api/soap/catalog/catalogProduct/catalog_product.list.html
+ * @param    array  $catalogProductEntity 
+ *
+ */
+function cleanProduct($catalogProductEntity){
 
-for($x = 0; $x < $numberOfProducts; $x++){
+    for($x = 0; $x < $numberOfProducts; $x++){
 
-    $product= $catalogProductEntity[$x];
-    $fields  = ['sku','name', 'price', 'short_description'];
-    $catalogProductReturnEntity = $soap->call($session, 'catalog_product.info', $product['product_id'], $fields  );
-    
-    $product = [];
-    foreach($fields as $field){
-        if(isset($catalogProductReturnEntity[$field])!=null){
-            $product[$field] = $catalogProductReturnEntity[$field];
+        $product= $catalogProductEntity[$x];
+        $fields  = ['sku','name', 'price', 'short_description'];
+        $catalogProductReturnEntity = $soap->call($session, 'catalog_product.info', $product['product_id'], $fields  );
+        
+        $product = [];
+        foreach($fields as $field){
+            if(isset($catalogProductReturnEntity[$field])!=null){
+                $product[$field] = $catalogProductReturnEntity[$field];
+            }
         }
+        $products[] = $product;
     }
-    $products[] = $product;
+
+    return $products;
 }
 
-echo "<pre>";
-print_r($products);
+// echo "<pre>";
+// print_r($products);
 
 
 
@@ -51,6 +64,4 @@ $format = $factory->create($formatKey);
 // See ProductOutput in raz-lib.php for reference
 $output = new ProductOutput();
 // ...
-
-
 $output->format();
