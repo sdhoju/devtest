@@ -5,19 +5,24 @@
  */
 require_once __DIR__ . '/raz-lib.php';
 
-class FormatFactory
+class FormatFactory extends ProductOutput
 {
-    private $formatKey;
-
+    protected $formatKey;
+    
     public function create($formatKey){
+
         $this->formatkey=$formatKey;
 
         if ($this->formatkey == 'csv') {
-
+            //Add header to CSV file
             $header = array("sku", "name", "price", "short_description");
             $fp = fopen('outputs/output.csv', 'w');
             fputcsv($fp, $header);
+            foreach ($this->products as $product) {
+                fputcsv($fp, $product);  
+            }
             fclose($fp);
+        
         }
 
         if ($this->formatKey == 'xml') {
