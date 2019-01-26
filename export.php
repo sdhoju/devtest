@@ -22,9 +22,7 @@ $products  = $client->call($sessionId, "catalog_product.list");
 
 
 // You will need to create a FormatFactory.
-$formatKey = 'csv'; // csv, xml, or json
-
-
+$formatKey = 'json'; // csv, xml, or json
 $factory = new FormatFactory(); 
 $factory->setProducts($products);
 $format = $factory->create($formatKey);
@@ -34,4 +32,6 @@ $format = $factory->create($formatKey);
 // See ProductOutput in raz-lib.php for reference
 $output = new ProductOutput();
 // ...
+$output->setFormat($format);
+
 $output->format();

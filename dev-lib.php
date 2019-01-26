@@ -6,18 +6,88 @@
 require_once __DIR__ . '/raz-lib.php';
 require_once __DIR__ . '/export.php';
 require_once __DIR__ . '/Soap.php';
+require_once __DIR__ . '/util.php';
 
 
-class FormatFactory extends ProductOutput implements FormatInterface
+/**
+ * FormatFactory class 
+ *
+ * Is used to create the format and output for the project.
+ */
+class FormatFactory extends ProductOutput 
 {
+
+    /** @var string $formatKey represents the format key to be outputed(csv,xml,json)*/
     protected $formatKey;
-    protected $product;
 
 
+    /**
+     * Creates the output of products in requested format 
+     *
+     * @param string $formatKey is the requested format key(csv,xml,json)
+     *
+     * @return Format format is the implementation of Formatinterface
+     */
+    public function create($formatKey){
+
+        $this->format = new Format();
+
+        $this->formatkey=$formatKey;
+        $maxProduct=5;
+
+        if ($this->formatkey == 'csv') {
+
+            //Add header to CSV file
+            $header = array("sku", "name", "price", "short_description");
+            $fp = fopen('outputs/output.csv', 'w');
+            fputcsv($fp, $header);
+
+            // foreach($this->products as $product){
+            for($i=0; $i<$maxProduct; $i++) {
+                $product = $this->products[$i];
+                $cleanProduct=$this->format->formatProduct($product);
+                fputcsv($fp, array_values($cleanProduct));
+            }
+            fclose($fp);
+        
+        }
+
+        if ($this->formatKey == 'xml') {
+            echo "From dev-lib.php. TODO for xml";
+            
+
+        }
+
+        if ($formatKey == 'json') {
+
+            $cleanProducts=[];
+            for($i=0; $i<$maxProduct; $i++) {
+                $product = $this->products[$i];
+                $cleanProducts[]=$this->format->formatProduct($product);
+            }
+            echo arrayToJSON($cleanProducts);
+        }
+        return $this->format;
+    }   
+}
+
+/**
+ * Format class is the implementation of FormatInterface 
+ *
+ * Is used to create the format and define the formatProduct
+ */
+class Format implements FormatInterface{
     public function start(){
-        echo "Start";
     }
 
+    /**
+     * Clean the products from 
+     *
+     * @param array $product catalogProductEntity 
+     * more info in https://devdocs.magento.com/guides/m1x/api/soap/catalog/catalogProduct/catalog_product.list.html
+     *
+     * @return array $cleanProduct that has only 4 attributes.'sku','name', 'price', 'short_description'
+     */
     public function formatProduct(array $product){
         $soap= new Soap();
         $client = $soap->getClient();
@@ -36,44 +106,5 @@ class FormatFactory extends ProductOutput implements FormatInterface
 
 
     public function finish(){
-        echo "Finish";
     }
-
-    public function create($formatKey){
-
-        $this->start();
-        $this->formatkey=$formatKey;
-        if ($this->formatkey == 'csv') {
-
-            $maxProduct=5;
-            //Add header to CSV file
-            $header = array("sku", "name", "price", "short_description");
-            $fp = fopen('outputs/output.csv', 'w');
-            fputcsv($fp, $header);
-
-            for($i=0; $i<$maxProduct; $i++) {
-                $product = $this->products[$i];
-                $cleanProduct=$this->formatProduct($product);
-                $onlyValues = array_values($cleanProduct);
-                fputcsv($fp, $onlyValues);
-            }
-            fclose($fp);
-        
-        }
-
-        if ($this->formatKey == 'xml') {
-            echo "From dev-lib.php. TODO for xml";
-
-        }
-
-        if ($this->formatKey == 'json') {
-            echo "From dev-lib.php. TODO for json";
-
-        }
-
-        $this->formatProduct($product);
-        $this->finish();
-
-    }
-    
 }
