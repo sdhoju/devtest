@@ -20,10 +20,29 @@ $soap = new SoapClient($apiWsdl);
 // ...
 
 $session = $soap->login($apiUser, $apiKey);
-$products = $soap->call($session, 'product.list');
+$catalogProductEntity  = $soap->call($session, "catalog_product.list");
+
+$numberOfProducts=20; 
+
+for($x = 0; $x < $numberOfProducts; $x++){
+
+    $product= $catalogProductEntity[$x];
+    $fields  = ['sku','name', 'price', 'short_description'];
+    $catalogProductReturnEntity = $soap->call($session, 'catalog_product.info', $product['product_id'], $fields  );
+    
+    $product = [];
+    foreach($fields as $field){
+        if(isset($catalogProductReturnEntity[$field])!=null){
+            $product[$field] = $catalogProductReturnEntity[$field];
+        }
+    }
+    $products[] = $product;
+}
+
+echo "<pre>";
+print_r($products);
 
 
-print_r($products[0]);
 
 // You will need to create a FormatFactory.
 $factory = new FormatFactory(); 
@@ -32,4 +51,6 @@ $format = $factory->create($formatKey);
 // See ProductOutput in raz-lib.php for reference
 $output = new ProductOutput();
 // ...
+
+
 $output->format();

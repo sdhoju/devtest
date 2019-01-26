@@ -3,11 +3,12 @@
 /**
  * Your code goes here
  */
+require_once __DIR__ . '/raz-lib.php';
 
 class FormatFactory
 {
     protected $formatKey;
-    
+
     public function create($formatKey){
         $this->formatkey=$formatKey;
         //TODO 
