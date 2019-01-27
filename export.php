@@ -17,18 +17,16 @@ $client = $soap->getClient();
 $sessionId = $soap->getSession();
 
 $products  = $client->call($sessionId, "catalog_product.list");
-// echo "<pre>";
-// print_r($products);
-
 
 // $requestedFormat= $_GET['format'];
 // You will need to create a FormatFactory.
-$formatKey = 'xml'; // Change it to csv, xml, or json
+$formatKey = 'csv'; // Change it to csv, xml, or json
 
 
 $factory = new FormatFactory(); 
 $factory->setProducts($products);
 $format = $factory->create($formatKey);
+// $format = $factory->create($formatKey,true);
 
 
 
@@ -36,5 +34,4 @@ $format = $factory->create($formatKey);
 $output = new ProductOutput();
 // ...
 $output->setFormat($format);
-
 $output->format();
