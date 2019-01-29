@@ -2,6 +2,7 @@
 # Magento Default Files    #
 #--------------------------#
 outputs
+output
 
 /app/etc/local.xml
 

@@ -35,8 +35,8 @@ function arrayToJSON($products){
         $product[] = $productArray;
     }
     
-    $product = implode(",\n\t", $product);
-    $jsonObj= ($assoc)? "\n\t{".$product."}" : "[".$product."\n]";
+    $product = implode(",\n", $product);
+    $jsonObj= ($assoc)? "{".$product."}\n" : "[".$product."\n]";
 
     return $jsonObj;
 }

@@ -24,14 +24,15 @@ $formatKey = 'csv'; // Change it to csv, xml, or json
 
 
 $factory = new FormatFactory(); 
-$factory->setProducts($products);
 $format = $factory->create($formatKey);
-// $format = $factory->create($formatKey,true);
 
 
 
 // See ProductOutput in raz-lib.php for reference
 $output = new ProductOutput();
 // ...
+$output->setProducts($products);
 $output->setFormat($format);
+
+
 $output->format();

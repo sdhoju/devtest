@@ -14,12 +14,9 @@ require_once __DIR__ . '/util.php';
  *
  * Is used to create the format and output for the project.
  */
-class FormatFactory extends ProductOutput 
+class FormatFactory
 {
-
-    /** @var string $formatKey represents the format key to be outputed(csv,xml,json)*/
-    protected $formatKey;
-
+    protected $format;
 
     /**
      * Creates the output of products in requested format 
@@ -30,92 +27,13 @@ class FormatFactory extends ProductOutput
      * 
      * @return Format format is the implementation of Formatinterface
      */
-    public function create($formatKey, $toDownload=false){
+    public function create($formatKey){
 
         $this->format = new Format();
 
-        $this->formatkey=$formatKey;
-        
-        $maxProduct=10;
-        $maxProduct=count($this->products);
+        $this->format->setFormatKey($formatKey);
 
-        $cleanProducts=[];
-        for($i=0; $i<$maxProduct; $i++) {
-            $product = $this->products[$i];
-            $cleanProducts[]=$this->format->formatProduct($product);
-        }
-
-        if ($this->formatkey == 'csv') {
-
-            //Add header to CSV file
-            $header = array("sku", "name", "price", "short_description");
-            echo "<br><center>";
-            echo '<table>';
-            echo '<tr>';
-            foreach($header as $th){
-                echo '<th>'.$th.'</th>';
-            } echo '</tr>';
-            
-            foreach($cleanProducts as $product){
-                echo '<tr>';
-                    echo '<td>'.$product['sku'].'</td>';
-                    echo '<td>'.$product['name'].'</td>';
-                    echo '<td>'.$product['price'].'</td>';
-                    echo '<td>'.$product['short_description'].'</td>';
-                echo '</tr>';
-            } 
-            echo '</table>';
-            echo "</center>";
-            if($toDownload){
-                $fp = fopen('output/output.csv', 'w');
-                fputcsv($fp, $header);
-                foreach($cleanProducts as $cleanProduct){
-                    fputcsv($fp, array_values($cleanProduct));
-                }
-                fclose($fp);
-            }
-        
-        }
-
-        if ($formatKey == 'xml') {
-            
-            $xmlArray= array(
-                "products"=>array(
-                    "product"=>$cleanProducts
-            ));
-            header('Content-Type: text/xml');
-            $xmlObject = new myXML('1.0', 'utf-8');
-            $xmlObject->preserveWhiteSpace = false;
-            $xmlObject->formatOutput = true;
-
-            $xmlObject->fromMixed($xmlArray);
-            $xmlObject = $xmlObject ->saveXML();
-            echo $xmlObject;
-
-            if($toDownload){
-                $fp = fopen('output/output.xml', 'w');
-                fwrite($fp, $xmlObject);
-                fclose($fp);
-            }
-        }
-
-        if ($formatKey == 'json') {
-
-            $cleanProducts=[];
-            for($i=0; $i<$maxProduct; $i++) {
-                $product = $this->products[$i];
-                $cleanProducts[]=$this->format->formatProduct($product);
-            }
-            header('Content-Type: application/json');
-            $productJSON =  arrayToJSON($cleanProducts);
-            echo $productJSON;
-
-            if($toDownload){
-                $fp = fopen('output/output.json', 'w');
-                fwrite($fp, $productJSON);
-                fclose($fp);
-            }
-        }
+        // echo "Format Created";
         return $this->format;
     }   
 }
@@ -126,11 +44,42 @@ class FormatFactory extends ProductOutput
  * Is used to create the format and define the formatProduct
  */
 class Format implements FormatInterface{
+    /** @var string $formatKey represents the format key to be outputed(csv,xml,json)*/
+    protected $formatKey;
+    protected $output='';
+    protected  $xmlObject;
+
     public function start(){
+        switch ($this->formatKey) {
+            
+            case 'csv':
+                $header = array("sku", "name", "price", "short_description");
+                // $header = array("sku", "name");
+
+                $this->output.= "<br><center>";
+                $this->output.=  '<table>';
+                $this->output.=  '<tr>';
+                foreach($header as $th){
+                    $this->output.=  '<th>'.$th.'</th>';
+                } $this->output.=  '</tr>';
+                return   $this->output;
+
+                break;
+            case 'xml':
+                header('Content-Type: text/xml');
+                $this->xmlObject = new myXML('1.0', 'utf-8');
+                
+                break;
+            case 'json':
+                header('Content-Type: application/json');
+
+
+                break;
+        }
     }
 
     /**
-     * Clean the products from 
+     * Clean the format the product according to the formatkey 
      *
      * @param array $product catalogProductEntity 
      * more info in https://devdocs.magento.com/guides/m1x/api/soap/catalog/catalogProduct/catalog_product.list.html
@@ -138,6 +87,70 @@ class Format implements FormatInterface{
      * @return array $cleanProduct that has only 4 attributes.'sku','name', 'price', 'short_description'
      */
     public function formatProduct(array $product){
+        $this->output='';
+
+        $fields  = ['sku','name', 'price', 'short_description'];
+        $product=$this->moreInfo($fields,$product);
+        
+        
+        
+        switch ($this->formatKey) {
+            case 'csv':
+                $this->output.= '<tr>';
+                $this->output.= '<td>'.$product['sku'].'</td>';
+                $this->output.= '<td>'.$product['name'].'</td>';
+                $this->output.= '<td>'.$product['price'].'</td>';
+                $this->output.= '<td>'.$product['short_description'].'</td>';
+                $this->output.= '</tr>';
+                return   $this->output;
+                break;
+            case 'xml':
+                // $xmlArray= array(
+                //     "product"=>array(
+                //         "detail"=>$product
+                // ));
+                // $this->xmlObject->preserveWhiteSpace = false;
+                // $this->xmlObject->formatOutput = true;
+
+                // $this->xmlObject->fromMixed($xmlArray);
+                // $this->xmlObject = $this->xmlObject ->saveXML();
+                // return $this->xmlObject;
+                return "In Progress";
+                break;
+            case 'json':
+                $productJSON =  arrayToJSON($product);
+                return $productJSON;
+                break;
+        }
+
+    }
+
+
+    public function finish(){
+        return "end";
+    }
+
+     /**
+     * Set the output format key 
+     * 
+     * @param string $key format of the output 'csv','xml','json'
+     */
+    public function setFormatKey($key){
+        $this->formatKey = $key;
+    }
+
+
+     /**
+     * get the information not present in catalogProductEntity
+     * 
+     * @param array $field array of more fields ['sku','name', 'price', 'short_description']
+     * @param array $product catalogProductEntity 
+     * more info in https://devdocs.magento.com/guides/m1x/api/soap/catalog/catalogProduct/catalog_product.info.html
+     *
+     * @return array $cleanProduct that has only 4 attributes.
+     */
+    public function moreInfo($fields, $product){
+
         $soap= new Soap();
         $client = $soap->getClient();
         $sessionId = $soap->getSession();
@@ -145,21 +158,14 @@ class Format implements FormatInterface{
         $catalogProductReturnEntity = $client->call($sessionId, 'catalog_product.info', $product['product_id']  );
         
         $cleanProduct = [];
-        $cleanProduct['sku']=$product['sku'];
-        $cleanProduct['name']=$product['name'];
-        // $cleanProduct['price'] = $catalogProductReturnEntity['price'];
-        // $cleanProduct['short_description'] = $catalogProductReturnEntity['short_description'];
-
-        $fields  = [ 'price', 'short_description'];
         foreach($fields as $field){
             if(isset($catalogProductReturnEntity[$field])!=null){
                 $cleanProduct[$field] = $catalogProductReturnEntity[$field];
-            }
+            }else
+                $cleanProduct[$field] = '';
         }
+
         return $cleanProduct;
-    }
 
-
-    public function finish(){
     }
 }
