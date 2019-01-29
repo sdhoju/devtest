@@ -41,53 +41,19 @@ function arrayToJSON($products){
     return $jsonObj;
 }
 
-
- /**
- * Extends the DOMDocument to implement Create XML
+/**
+ *  Creates a child for xml representation
+ * 
+ * @param array $product  
  *
- * Referecnce https://www.devexp.eu/2009/04/11/php-domdocument-convert-array-to-xml/
+ * @return object $xmlProduct xml representation of a Product
  */
-class myXML extends DOMDocument {
-
-	/**
-	 * Constructs elements and texts from an array or string.
-	 * The array can contain an element's name in the index part
-	 * and an element's text in the value part.
-     * 
-	 * @param mixed $mixed An array or string.
-	 * 
-	 * @param DOMElement[optional] $domElement Then element
-	 * from where the array will be construct to.
-	 * 
-	 */
-	public function fromMixed($productsArray, DOMElement $domElement = null) {
-
-		$domElement = is_null($domElement) ? $this : $domElement;
-
-		if (is_array($productsArray)) {
-			foreach( $productsArray as $index => $products ) {
-
-				if ( is_int($index) ) {
-					if ( $index == 0 ) {
-						$product = $domElement;
-					} else {
-						$product = $this->createElement($domElement->tagName);
-						$domElement->parentNode->appendChild($product);
-					}
-				} 
-				
-				else {
-					$product = $this->createElement($index);
-					$domElement->appendChild($product);
-				}
-				
-				$this->fromMixed($products, $product);
-				
-			}
-		} else {
-			$domElement->appendChild($this->createTextNode($productsArray));
-		}
-		
+function arrayToXML($product){
+	$xmlProduct ="<product>\n\t";
+	foreach($product as $key=>$value){
+		$xmlProduct.='<'.$key.'>'.htmlspecialchars($value).'</'.$key.">\n";
 	}
-	
+	$xmlProduct.="</product>\n";
+	return $xmlProduct;
+
 }

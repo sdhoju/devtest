@@ -20,7 +20,7 @@ $products  = $client->call($sessionId, "catalog_product.list");
 
 // $requestedFormat= $_GET['format'];
 // You will need to create a FormatFactory.
-$formatKey = 'csv'; // Change it to csv, xml, or json
+$formatKey = 'xml'; // Change it to csv, xml, or json
 
 
 $factory = new FormatFactory(); 

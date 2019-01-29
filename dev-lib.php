@@ -27,6 +27,7 @@ class FormatFactory
      * 
      * @return Format format is the implementation of Formatinterface
      */
+
     public function create($formatKey){
 
         $this->format = new Format();
@@ -48,6 +49,7 @@ class Format implements FormatInterface{
     protected $formatKey;
     protected $output='';
     protected  $xmlObject;
+    protected $xml='';
 
     public function start(){
         switch ($this->formatKey) {
@@ -67,9 +69,13 @@ class Format implements FormatInterface{
                 break;
             case 'xml':
                 header('Content-Type: text/xml');
-                $this->xmlObject = new myXML('1.0', 'utf-8');
-                
+                $this->xml='<?xml version="1.0" encoding="utf-8"?>
+                <products>
+                ';
+                return $this->xml;
+
                 break;
+
             case 'json':
                 header('Content-Type: application/json');
 
@@ -88,6 +94,7 @@ class Format implements FormatInterface{
      */
     public function formatProduct(array $product){
         $this->output='';
+        $this->xml= '';
 
         $fields  = ['sku','name', 'price', 'short_description'];
         $product=$this->moreInfo($fields,$product);
@@ -104,19 +111,12 @@ class Format implements FormatInterface{
                 $this->output.= '</tr>';
                 return   $this->output;
                 break;
-            case 'xml':
-                // $xmlArray= array(
-                //     "product"=>array(
-                //         "detail"=>$product
-                // ));
-                // $this->xmlObject->preserveWhiteSpace = false;
-                // $this->xmlObject->formatOutput = true;
 
-                // $this->xmlObject->fromMixed($xmlArray);
-                // $this->xmlObject = $this->xmlObject ->saveXML();
-                // return $this->xmlObject;
-                return "In Progress";
+            case 'xml':
+                $this->xml.=arrayToXML($product);
+                return $this->xml;
                 break;
+
             case 'json':
                 $productJSON =  arrayToJSON($product);
                 return $productJSON;
@@ -127,7 +127,9 @@ class Format implements FormatInterface{
 
 
     public function finish(){
-        return "end";
+        if($this->formatKey=='xml')
+         $this->xml='</products>';
+         return $this->xml;
     }
 
      /**
@@ -164,8 +166,6 @@ class Format implements FormatInterface{
             }else
                 $cleanProduct[$field] = '';
         }
-
         return $cleanProduct;
-
     }
 }
