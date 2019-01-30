@@ -57,3 +57,30 @@ function arrayToXML($product){
 	return $xmlProduct;
 
 }
+
+/**
+ * get the information not present in catalogProductEntity
+ * 
+ * @param array $field array of more fields ['sku','name', 'price', 'short_description']
+ * @param array $product catalogProductEntity 
+ * more info in https://devdocs.magento.com/guides/m1x/api/soap/catalog/catalogProduct/catalog_product.info.html
+ *
+ * @return array $cleanProduct that has only 4 attributes.
+ */
+function moreInfo($fields, $product){
+
+    $soap= new Soap();
+    $client = $soap->getClient();
+    $sessionId = $soap->getSession();
+    
+    $catalogProductReturnEntity = $client->call($sessionId, 'catalog_product.info', $product['product_id']  );
+    
+    $cleanProduct = [];
+    foreach($fields as $field){
+        if(isset($catalogProductReturnEntity[$field])!=null){
+            $cleanProduct[$field] = $catalogProductReturnEntity[$field];
+        }else
+            $cleanProduct[$field] = '';
+    }
+    return $cleanProduct;
+}
